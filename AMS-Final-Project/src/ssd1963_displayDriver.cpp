@@ -20,7 +20,7 @@
 ************************************************************/  
 
 //#define F_CPU 16000000
-#include "DisplayDriver_ssd1963.h"
+#include "ssd1963_displayDriver.hpp"
 
 // Data port definitions:
 #define DB0 2
