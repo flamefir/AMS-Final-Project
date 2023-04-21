@@ -53,13 +53,23 @@ void SSD1963::init()
 {
     reset();
 
+    
+    /* Se side 18
+    Before the PLL output is configured as the system clock by the bit 1 of “set_pll” command 0xE0, the system
+    will be clocked by the reference clock. This enables the user to send the “set_pll_mn” command 0xE2 to the
+    PLL for frequency configuration.
+    */
     writeCommand(0xE2); //PLL multiplier, set PLL clock to 120M
     writeData(0x23);    //N=0x36 for 6.5M, 0x23 for 10M crystal
     writeData(0x02);
     writeData(0x04);
+    /* Se side 18
+    When the PLL frequency is configured and the PLL was enabled with the
+    bit 0 of “set_pll” command 0xE0, the user should still wait for 100us for the PLL to lock.
+    */
     writeCommand(0xE0); // PLL enable
     writeData(0x01);
-    delay(10);
+    
     writeCommand(0xE0);
     writeData(0x03);
     delay(10);

@@ -1,64 +1,109 @@
 /************************************************************
-  File name: "TFTdriver.c"
+  File name: "ssd1963_displayDriver.hpp"
 
   Driver for "ITDB02 320 x 240 TFT display module, Version 2"
   mounted at "ITDB02 Arduino Mega2560 Shield".
-  Display controller = ILI 9341.
+  Display controller = ssd1963.
   
-  Max. uC clock frequency = 16 MHz (Tclk = 62,5 ns)
+  Max. uC clock frequency = 1/240 MHz (Tclk = 4.1667 ns)
 
   Connections:
-  DB15-DB8:   PORT A
-  DB7-DB0:    PORT C
+  
 
-  RESETx:     PORT G, bit 0
-  CSx:        PORT G, bit 1
-  WRx:        PORT G, bit 2
-  RS (=D/Cx): PORT D, bit 7
-
-  Henning Hargaard, February 15, 2018
+  Malte Flammild, 19. April 2023
 ************************************************************/  
 #include <driver/timer.h>
 #include <driver/gpio.h>
 #include <driver/ledc.h>
 //#include <esp_timer.h>
 #include "ssd1963_gpio.hpp"
+#include "Color.hpp"
 
-#define SSD_FAST
-#define SSD_WR_DATA(x)	ssdDataSlow(x)
-#define SSD_WR_CMD(x)	ssdCmdSlow(x)
-
-/* Implement later, for now we only run in slow mode */
-// #ifndef SSD_FAST
-// #else
-// #define SSD_WR_DATA(x)	ssdDataSlow(x)
-// #define SSD_WR_CMD(x)	ssdCmdSlow(x)
-// #endif
-
-
-void init_timer_clk()
+class ssd1963
 {
-  gpio_pad_select_gpio(GPIO_NUM_5); //set gpio pad as gpio pin
-  gpio_set_direction(GPIO_NUM_5, GPIO_MODE_OUTPUT);
+private:
+    void ssdDataSlow(uint8_t value);
+    void ssdCmdSlow(uint8_t value);
+public:
+    explicit ssd1963(gpio_num_t controlPins[], gpio_num_t dataPins[]);
+    ~ssd1963();
+    void DisplayInit();
+    void DisplayReset();
+    void DisplayOff();
+    void DisplayOn();
+    void EnterSleepMode();
+    void ExitSleepMode();
+    void MemoryAccessControl(unsigned char parameter);
+    void InterfacePixelFormat(unsigned char parameter);
+    void WritePixel(unsigned char Red, unsigned char Blue, unsigned char Green);
+    void SetColumnAddress(uint16_t Start, uint16_t End);
+    void SetPageAddress(uint16_t Start, uint16_t End);
+    void MemoryWrite();
+    void FillRectangle(unsigned int StartX, unsigned int StartY, unsigned int Width, unsigned int Height, unsigned char Red, unsigned char Green, unsigned char Blue);
+    /*test*/
+    void setColRowStartStop(uint16_t x_ColStart, uint16_t y_RowStart, uint16_t x_ColEnd, uint16_t y_RowEnd);
+    void fill(uint16_t x_ColStart, uint16_t y_RowStart, uint16_t x_ColEnd, uint16_t y_RowEnd, unsigned char Red, unsigned char Blue, unsigned char Green);
+    
+    ssd1963_gpio gpioControl_;
+};
 
-  ledc_timer_config_t ledc_timer = {
-    .duty_resolution = LEDC_TIMER_1_BIT, // resolution of PWM duty
-    .freq_hz = 40000000,                      // frequency of PWM signal. 40 mHz.
-    .speed_mode = LEDC_HIGH_SPEED_MODE,   // timer mode
-    .timer_num = LEDC_TIMER_1,            // timer index
-    .clk_cfg = LEDC_APB_CLK,             // Auto select the source clock
-  };
-  ledc_timer_config(&ledc_timer);
 
-  ledc_channel_config_t ledc_channel = {
-    .channel    = LEDC_CHANNEL_0,
-    .duty       = 0,
-    .gpio_num   = GPIO_NUM_5,
-    .speed_mode = LEDC_HIGH_SPEED_MODE,
-    .hpoint     = 0,
-    .timer_sel  = LEDC_TIMER_1
-  };
-  ledc_channel_config(&channel_config);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// void init_timer_clk()
+// {
+//   gpio_pad_select_gpio(GPIO_NUM_5); //set gpio pad as gpio pin
+//   gpio_set_direction(GPIO_NUM_5, GPIO_MODE_OUTPUT);
+
+
+//     // "out-of-order err" dot operator syntax ikke supported, se ssd1963_gpio med gpio_config_t 
+//   ledc_timer_config_t ledc_timer = {
+//     .duty_resolution = LEDC_TIMER_1_BIT, // resolution of PWM duty
+//     .freq_hz = 40000000,                      // frequency of PWM signal. 40 mHz.
+//     LEDC_HIGH_SPEED_MODE,   // timer mode
+//     .timer_num = LEDC_TIMER_1,            // timer index
+//     .clk_cfg = LEDC_APB_CLK,             // Auto select the source clock
+//   };
+//   ledc_timer_config(&ledc_timer);
+
+//   ledc_channel_config_t ledc_channel = {
+//     .channel    = LEDC_CHANNEL_0,
+//     .duty       = 0,
+//     .gpio_num   = GPIO_NUM_5,
+//     .speed_mode = LEDC_HIGH_SPEED_MODE,
+//     .hpoint     = 0,
+//     .timer_sel  = LEDC_TIMER_1
+//   };
+//   ledc_channel_config(&channel_config);
 
   // timer_config_t config = {
   //     .alarm_en = TIMER_ALARM_EN,
@@ -78,33 +123,7 @@ void init_timer_clk()
 
 
   // timer_start(TIMER_GROUP_1, TIMER_1);
-}
-static inline void ssd_cmd(const unsigned char k[static 1], unsigned data_len)
-{
-	SSD_WR_CMD(*k);
-	k++;
-	while (data_len) {
-		SSD_WR_DATA(*k);
-		k++;
-		data_len--;
-	}
-}
-
-#define SSD_CMD0(k)		ssd_cmd(k, sizeof(k)-1)
-#define SSD_CMD(...)		SSD_CMD0(((unsigned char[]){ __VA_ARGS__ }))
-
-void DisplayInit();
-void DisplayOff();
-void DisplayOn();
-void SleepOut();
-void MemoryAccessControl(unsigned char parameter);
-void InterfacePixelFormat(unsigned char parameter);
-void WritePixel(unsigned char Red, unsigned char Blue, unsigned char Green);
-void SetColumnAddress(unsigned int Start, unsigned int End);
-void SetPageAddress(unsigned int Start, unsigned int End);
-void MemoryWrite();
-void FillRectangle(unsigned int StartX, unsigned int StartY, unsigned int Width, 
-                   unsigned int Height, unsigned char Red, unsigned char Green, unsigned char Blue);
+//}
 
 
 
