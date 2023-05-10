@@ -20,9 +20,9 @@ inline float rand(int min, int max)
 #define LCD_RST GPIO_NUM_25
 
 SPIClass &vspi = SPI;
-SPIClass hspi(HSPI);
-N4094 sreg(hspi, GPIO_NUM_15);
-HR2046 touch(vspi, GPIO_NUM_5);
+//SPIClass hspi(HSPI);
+N4094 sreg(vspi, GPIO_NUM_5);
+//HR2046 touch(vspi, GPIO_NUM_5);
 SSD1963 display(sreg, LCD_RS, LCD_WR, LCD_CS, LCD_RST);
 
 static bool touchFlag = false;
@@ -43,15 +43,15 @@ void setup()
   vspi.begin();
   vspi.setFrequency(1000000);
 
-  hspi.begin();
-  hspi.setFrequency(10000000);
+  // hspi.begin();
+  // hspi.setFrequency(10000000);
 
   sreg.init();
   display.init();
-  touch.init();
+  //touch.init();
 
-  pinMode(GPIO_NUM_34, INPUT_PULLUP);
-  attachInterrupt(GPIO_NUM_34, touchIrq, FALLING);
+  //pinMode(GPIO_NUM_34, INPUT_PULLUP);
+  //attachInterrupt(GPIO_NUM_34, touchIrq, FALLING);
 }
 
 void loop()
@@ -72,20 +72,20 @@ void loop()
     break;
   }
 
-  if (touchFlag)
-  {
+  // if (touchFlag)
+  // {
 
-    uint16_t x;
-    uint16_t y;
-    uint32_t z;
-    touch.readRaw(x, y, z);
-    if (z > 200)
-    {
-      printf("Touch: [%d, %d, %d]\n", x, y, z);
-    }
+  //   uint16_t x;
+  //   uint16_t y;
+  //   uint32_t z;
+  //   touch.readRaw(x, y, z);
+  //   if (z > 200)
+  //   {
+  //     printf("Touch: [%d, %d, %d]\n", x, y, z);
+  //   }
 
-    delay(10);
+  //   delay(10);
 
-    touchFlag = false;
-  }
+  //   touchFlag = false;
+  // }
 }

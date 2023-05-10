@@ -2,6 +2,22 @@
 
 #include <Arduino.h>
 
+#define COLOR_BLACK rgb(0x00, 0x00, 0x00)
+#define COLOR_RED rgb(0xFF, 0x00, 0x00)
+#define COLOR_GREEN rgb(0x00, 0xFF, 0x00)
+#define COLOR_BLUE rgb(0x00, 0x00, 0xFF)
+#define COLOR_YELLOW rgb(0xFF, 0xFF, 0x00)
+#define COLOR_CYAN rgb(0x00, 0xFF, 0xFF)
+#define COLOR_MAGENTA rgb(0xFF, 0x00, 0xFF)
+#define COLOR_SILVER rgb(0xC0, 0xC0, 0xC0)
+#define COLOR_GRAY rgb(0x80, 0x80, 0x80)
+#define COLOR_MAROON rgb(0x80, 0x00, 0x00)
+#define COLOR_OLIVE rgb(0x80, 0x80, 0x00)
+#define COLOR_WHITE rgb(0xFF, 0xFF, 0xFF)
+#define COLOR_PURPLE rgb(0x80, 0x00, 0x80)
+#define COLOR_TEAL rgb(0x00, 0x80, 0x80)
+
+
 using Color = uint16_t;
 
 struct RGB
@@ -14,14 +30,6 @@ struct RGB
 inline Color rgb(uint8_t r, uint8_t g, uint8_t b)
 {
     return ((r >> 3) << 11) | ((g >> 2) << 5) | b >> 3;
-}
-
-inline Color rgb(float r, float g, float b)
-{
-    return rgb(
-        static_cast<uint8_t>(r * 255),
-        static_cast<uint8_t>(g * 255),
-        static_cast<uint8_t>(b * 255));
 }
 
 // Source: https://stackoverflow.com/a/6930407

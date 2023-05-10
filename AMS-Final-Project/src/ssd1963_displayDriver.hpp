@@ -15,17 +15,20 @@
 #include <driver/timer.h>
 #include <driver/gpio.h>
 #include <driver/ledc.h>
-//#include <esp_timer.h>
 #include "ssd1963_gpio.hpp"
 #include "Color.hpp"
+#include "N4094.hpp"
+#include "font.hpp"
 
 class ssd1963
 {
 private:
     void ssdDataSlow(uint8_t value);
     void ssdCmdSlow(uint8_t value);
+    N4094 shiftRegister_;
+    ssd1963_gpio gpioControl_;
 public:
-    explicit ssd1963(gpio_num_t controlPins[], gpio_num_t dataPins[]);
+    explicit ssd1963(N4094 shiftRegister, ssd1963_gpio gpioControl);
     ~ssd1963();
     void DisplayInit();
     void DisplayReset();
@@ -35,16 +38,15 @@ public:
     void ExitSleepMode();
     void MemoryAccessControl(unsigned char parameter);
     void InterfacePixelFormat(unsigned char parameter);
-    void WritePixel(unsigned char Red, unsigned char Blue, unsigned char Green);
     void SetColumnAddress(uint16_t Start, uint16_t End);
     void SetPageAddress(uint16_t Start, uint16_t End);
     void MemoryWrite();
     void FillRectangle(unsigned int StartX, unsigned int StartY, unsigned int Width, unsigned int Height, unsigned char Red, unsigned char Green, unsigned char Blue);
     /*test*/
     void setColRowStartStop(uint16_t x_ColStart, uint16_t y_RowStart, uint16_t x_ColEnd, uint16_t y_RowEnd);
-    void fill(uint16_t x_ColStart, uint16_t y_RowStart, uint16_t x_ColEnd, uint16_t y_RowEnd, unsigned char Red, unsigned char Blue, unsigned char Green);
-    
-    ssd1963_gpio gpioControl_;
+    void fill(uint16_t x_ColStart, uint16_t y_RowStart, uint16_t x_ColEnd, uint16_t y_RowEnd, Color color);
+    void writeChar(uint16_t x_ColStart, uint16_t y_RowStart, char character, Color color, font * font, bool fontsize_8);
+    void writeString(uint16_t x_ColStart, uint16_t y_RowStart, char * stringArray, Color color, font * font, bool fontsize_8);
 };
 
 
